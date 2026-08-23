@@ -1,0 +1,76 @@
+<html>
+  <head>
+    <script type="module" src="popup.js"></script>
+    <meta charset="UTF-8" />
+    <link type="text/css" href="popup.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="popupWrap">
+      <div class="card">
+        <div class="switchContainer">
+          <h1>댓글 하이라이트 🖍</h1>
+          <label for="toggle" class="switch highlightSwitch">
+            <span class="toggleButton"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="switchContainer">
+          <h1>게시글 마커</h1>
+        </div>
+        <div class="switchContainer sub">
+          <h2>댓글 남긴 글 표시</h2>
+          <label for="toggle" class="switch small commentSwitch">
+            <span class="toggleButton"></span>
+          </label>
+        </div>
+        <div class="switchContainer sub">
+          <h2>좋아요 누른 글 표시</h2>
+          <label for="toggle" class="switch small likeSwitch">
+            <span class="toggleButton"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="switchContainer">
+          <h1>등록된 카페</h1>
+        </div>
+        <p class="hint">등록한 카페 링크에서만 마커가 표시됩니다. 카페마다 이모지 또는 제목 회색 마킹을 따로 설정할 수 있어요.</p>
+
+        <div class="addCafeRow sub">
+          <input type="text" class="cafeUrlInput" placeholder="카페 링크를 붙여넣으세요" />
+          <button type="button" class="addCafeBtn">등록</button>
+        </div>
+        <p class="addCafeError"></p>
+
+        <div class="cafeList"></div>
+      </div>
+
+      <template class="cafeItemTemplate">
+        <div class="cafeItem">
+          <div class="cafeItemHeader">
+            <span class="cafeName"></span>
+            <div class="cafeItemActions">
+              <button type="button" class="refreshCafeBtn" title="이름 다시 불러오기">↻</button>
+              <button type="button" class="removeCafeBtn">삭제</button>
+            </div>
+          </div>
+          <div class="cafeItemBody">
+            <div class="markTypeToggle">
+              <button type="button" class="markTypeBtn" data-type="emoji">이모지 마킹</button>
+              <button type="button" class="markTypeBtn" data-type="gray">제목 회색 마킹</button>
+            </div>
+            <div class="cafeEmojiWrap">
+              <span class="cafeEmojiLabel">이모지</span>
+              <input type="text" class="cafeEmojiInput" maxlength="4" placeholder="🧡" />
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <div class="modal">변경사항을 적용하려면 새로고침이 필요합니다.</div>
+    </div>
+  </body>
+</html>

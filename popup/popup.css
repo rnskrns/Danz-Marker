@@ -1,0 +1,356 @@
+html {
+  font-size: 60%;
+  width: 34rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI",
+    Roundedmplus1c-Regular, sans-serif;
+  background: linear-gradient(160deg, #ffe8cf 0%, #ffd6a8 100%);
+}
+
+.popupWrap {
+  padding: 1.6rem 1.4rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  max-height: 56rem;
+  overflow-y: auto;
+}
+
+.card {
+  background: #fffaf3;
+  border-radius: 2rem;
+  padding: 1.4rem 1.6rem;
+  box-shadow: 0 0.4rem 1rem rgba(255, 140, 66, 0.18);
+  border: 2px solid #ffe4bf;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #b25a15;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #c07a3c;
+}
+
+.hint {
+  margin: 0.6rem 0 0;
+  font-size: 1.15rem;
+  line-height: 1.5;
+  color: #c07a3c;
+}
+
+.modal {
+  padding: 0.9rem 1rem;
+  text-align: center;
+  font-size: 1.2rem;
+  color: #c07a3c;
+  background: #fff1de;
+  border-radius: 1.4rem;
+  border: 2px dashed #ffcb8e;
+}
+.modal.show {
+  font-weight: 700;
+  color: #ff6f3c;
+  background: #ffe4c8;
+  border-color: #ff9f45;
+}
+
+.switchContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.switchContainer.sub {
+  margin-top: 1.1rem;
+  padding-top: 1.1rem;
+  border-top: 2px dashed #ffe4bf;
+}
+
+.switch {
+  width: 5.4rem;
+  height: 2.8rem;
+  display: block;
+  position: relative;
+  border-radius: 2rem;
+  background-color: #ffd9ac;
+  box-shadow: inset 0 0 0.8rem 1px rgba(178, 90, 21, 0.12);
+  cursor: pointer;
+  transition: all 0.2s ease-in;
+}
+
+.switch .toggleButton {
+  width: 2.4rem;
+  height: 2.4rem;
+  position: absolute;
+  top: 50%;
+  left: 0.2rem;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  box-shadow: 0 0.1rem 0.3rem rgba(178, 90, 21, 0.25);
+  background: #fff;
+  transition: all 0.2s ease-in;
+}
+
+/* 체크박스가 체크되면 변경 이벤트 */
+.switch.active {
+  background: linear-gradient(135deg, #ffb15e 0%, #ff8c42 100%);
+}
+
+.switch.actived-already {
+  transition: none;
+  background: linear-gradient(135deg, #ffb15e 0%, #ff8c42 100%);
+}
+
+.switch.actived-already .toggleButton {
+  transition: none;
+}
+
+.switch.active .toggleButton,
+.switch.actived-already .toggleButton {
+  left: calc(100% - 2.6rem);
+}
+
+/* 게시글 마커 하위 옵션용 작은 스위치 */
+.switch.small {
+  width: 4rem;
+  height: 2.1rem;
+}
+
+.switch.small .toggleButton {
+  width: 1.7rem;
+  height: 1.7rem;
+}
+
+.switch.small.active .toggleButton,
+.switch.small.actived-already .toggleButton {
+  left: calc(100% - 1.9rem);
+}
+
+/* ===== 카페 등록 ===== */
+
+.addCafeRow {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.cafeUrlInput {
+  flex: 1;
+  min-width: 0;
+  height: 3rem;
+  padding: 0 1rem;
+  border: 2px solid #ffe4bf;
+  border-radius: 1.2rem;
+  font-size: 1.25rem;
+  outline: none;
+  background: #fff5e8;
+  color: #b25a15;
+}
+
+.cafeUrlInput:focus {
+  border-color: #ffb15e;
+}
+
+.addCafeBtn {
+  flex-shrink: 0;
+  height: 3rem;
+  padding: 0 1.2rem;
+  border: none;
+  border-radius: 1.2rem;
+  background: linear-gradient(135deg, #ffb15e 0%, #ff8c42 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.addCafeBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.addCafeBtn:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.addCafeError {
+  margin: 0.5rem 0 0;
+  min-height: 1.4rem;
+  font-size: 1.1rem;
+  color: #e0472b;
+  font-weight: 600;
+}
+
+.cafeList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.emptyHint {
+  margin: 0;
+  padding: 1.2rem 0.5rem;
+  text-align: center;
+  font-size: 1.15rem;
+  color: #c9a06e;
+}
+
+.cafeItem {
+  border: 2px solid #ffe4bf;
+  background: #fff5e8;
+  border-radius: 1.4rem;
+  padding: 1rem 1.1rem;
+}
+
+.cafeItemHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.cafeItemActions {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.refreshCafeBtn {
+  border: none;
+  background: transparent;
+  color: #b25a15;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  line-height: 1;
+  border-radius: 0.6rem;
+}
+
+.refreshCafeBtn:hover:not(:disabled) {
+  background: #ffe4bf;
+}
+
+.refreshCafeBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.refreshCafeBtn.spinning {
+  animation: ncm-spin 0.7s linear infinite;
+}
+
+@keyframes ncm-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.cafeName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #b25a15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.removeCafeBtn {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: #e0472b;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+}
+
+.removeCafeBtn:hover {
+  text-decoration: underline;
+}
+
+.cafeItemBody {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.markTypeToggle {
+  display: flex;
+  gap: 0.4rem;
+  background: #fff;
+  border: 2px solid #ffe4bf;
+  border-radius: 1.2rem;
+  padding: 0.25rem;
+}
+
+.markTypeBtn {
+  border: none;
+  background: transparent;
+  padding: 0.5rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #c07a3c;
+  cursor: pointer;
+  transition: all 0.15s ease-in;
+}
+
+.markTypeBtn.selected {
+  background: linear-gradient(135deg, #ffb15e 0%, #ff8c42 100%);
+  color: #fff;
+}
+
+.cafeEmojiWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cafeEmojiWrap.disabled {
+  opacity: 0.4;
+}
+
+.cafeEmojiLabel {
+  font-size: 1.05rem;
+  color: #c07a3c;
+  font-weight: 600;
+}
+
+.cafeEmojiInput {
+  width: 3.4rem;
+  height: 2.8rem;
+  box-sizing: border-box;
+  border: 2px solid #ffe4bf;
+  border-radius: 1rem;
+  text-align: center;
+  font-size: 1.3rem;
+  outline: none;
+  background: #fff;
+  color: #b25a15;
+}
+
+.cafeEmojiInput:focus {
+  border-color: #ffb15e;
+}
+
+.cafeEmojiInput:disabled {
+  cursor: not-allowed;
+}

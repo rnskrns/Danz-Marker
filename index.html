@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>스코어 컨트롤러</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+    <style>
+        :root {
+            /* base tokens (Broadcast theme) */
+            --bg: #0a0e16;
+            --bg-image: radial-gradient(circle at 15% 0%, rgba(56,189,248,0.10), transparent 40%),
+                        radial-gradient(circle at 85% 100%, rgba(56,189,248,0.07), transparent 45%);
+            --panel: #121926;
+            --panel-alt: #1a2233;
+            --line: #232c3d;
+            --text: #eef2f8;
+            --text-dim: #8590a6;
+            --accent: #38bdf8;          /* 포인트 색상: 하늘색 */
+            --accent-text: #04202b;
+            --accent-hover: #67cffb;
+            --accent-dim: rgba(56, 189, 248, 0.15);
+            --danger: #ff4d5e;
+            --danger-dim: rgba(255, 77, 94, 0.12);
+            --font-ui: 'Pretendard Variable', 'Pretendard', -apple-system, system-ui, sans-serif;
+            --font-score: 'Orbitron', sans-serif;
+            --radius-lg: 14px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --score-size: 18px;
+            --preview-score-size: 26px;
+        }
+
+        /* Design 2 (pixel/8-bit) theme overrides — control panel accent stays sky blue by request */
+        body[data-theme="pixel"] {
+            --bg: #14152b;
+            --bg-image:
+                linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+            --bg-size: 18px 18px;
+            --panel: #1e2040;
+            --panel-alt: #2a2c54;
+            --line: #4d4f8a;
+            --text: #f2f2fb;
+            --text-dim: #9a9dd6;
+            --accent: #38bdf8;
+            --accent-text: #04202b;
+            --accent-hover: #5cc9fb;
+            --accent-dim: rgba(56, 189, 248, 0.25);
+            --danger: #ff5d7a;
+            --danger-dim: rgba(255, 93, 122, 0.18);
+            --font-ui: 'Pretendard Variable', 'Pretendard', sans-serif;
+            --font-score: 'Press Start 2P', 'Pretendard Variable', sans-serif;
+            --radius-lg: 0px;
+            --radius-md: 0px;
+            --radius-sm: 0px;
+            --score-size: 13px;
+            --preview-score-size: 15px;
+            --pixel-shadow: 4px 4px 0 #000;
+        }
+        body[data-theme="pixel"] { background-size: var(--bg-size); image-rendering: pixelated; }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: var(--font-ui);
+            padding: 32px 20px 60px;
+            background: var(--bg);
+            background-image: var(--bg-image);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .container { max-width: 720px; margin: 0 auto; }
+        .hidden { display: none !important; }
+        .login-screen { max-width: 460px; margin: 12vh auto 0; }
+        .login-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 28px; }
+        .login-card h1 { margin: 0 0 8px; font-size: 24px; }
+        .login-card p { margin: 0 0 22px; color: var(--text-dim); line-height: 1.55; }
+        .login-row { display: flex; gap: 10px; }
+        .login-row input { flex: 1; min-width: 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--panel-alt); color: var(--text); font-size: 16px; }
+        .login-row button { padding: 12px 20px; background: var(--accent); color: var(--accent-text); }
+        .login-error { min-height: 20px; margin-top: 12px; color: var(--danger); font-size: 13px; }
+        .session-name { color: var(--text-dim); font-size: 13px; }
+
+        .header-box {
+            background: var(--panel);
+            padding: 22px 24px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--line);
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        body[data-theme="pixel"] .header-box { border: 3px solid var(--line); box-shadow: var(--pixel-shadow); }
+
+        .header-left { display: flex; flex-direction: column; gap: 6px; }
+        .eyebrow {
+            font-family: var(--font-score);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .live-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--danger);
+            box-shadow: 0 0 0 0 rgba(255,77,94,0.6);
+            animation: pulse 1.8s infinite;
+        }
+        body[data-theme="pixel"] .live-dot { border-radius: 0; }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(56,189,248,0.55); }
+            70% { box-shadow: 0 0 0 7px rgba(56,189,248,0); }
+            100% { box-shadow: 0 0 0 0 rgba(56,189,248,0); }
+        }
+        .title-text { font-size: 21px; font-weight: 700; color: var(--text); margin: 0; }
+
+        .theme-switch {
+            display: flex; gap: 8px; margin-bottom: 20px;
+        }
+        .theme-btn {
+            flex: 1;
+            padding: 11px 14px;
+            font-family: var(--font-ui);
+            font-size: 13px;
+            font-weight: 700;
+            background: var(--panel);
+            color: var(--text-dim);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+        }
+        .theme-btn.active {
+            background: var(--accent-dim);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        body[data-theme="pixel"] .theme-btn { border-width: 3px; box-shadow: 3px 3px 0 #000; }
+        body[data-theme="pixel"] .theme-btn.active { box-shadow: 3px 3px 0 #000, inset 0 0 0 2px var(--accent); }
+        body[data-theme="pixel"] .theme-btn:active { transform: translate(3px, 3px); box-shadow: none; }
+
+        .btn-copy {
+            background: var(--accent); color: var(--accent-text); padding: 12px 18px; border: none;
+            border-radius: var(--radius-md); cursor: pointer; font-weight: 700; font-size: 14px;
+            transition: 0.15s; white-space: nowrap;
+        }
+        .btn-copy:hover { background: var(--accent-hover); }
+        body[data-theme="pixel"] .btn-copy { border: 3px solid #000; box-shadow: var(--pixel-shadow); }
+        body[data-theme="pixel"] .btn-copy:active { transform: translate(4px, 4px); box-shadow: none; }
+
+        /* Live preview strip */
+        .preview-panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        body[data-theme="pixel"] .preview-panel { border: 3px solid var(--line); box-shadow: var(--pixel-shadow); }
+        .preview-label {
+            font-family: var(--font-score);
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+        .preview-board {
+            display: flex; gap: 12px; flex-wrap: wrap;
+            padding: 18px;
+            border-radius: var(--radius-md);
+            background: #05070c;
+        }
+        body[data-theme="pixel"] .preview-board { background: #0a0b1a; border-radius: 12px; border: 2px solid var(--line); }
+        .p-card {
+            position: relative;
+            background: rgba(10, 12, 18, 0.95);
+            border-radius: var(--radius-sm);
+            min-width: 130px;
+            padding: 10px 14px 12px;
+            overflow: hidden;
+        }
+        body[data-theme="pixel"] .p-card {
+            background: rgba(10, 12, 18, 0.95);
+            border: none;
+            border-radius: 14px;
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.35);
+            padding-top: 14px;
+        }
+        .p-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: var(--_c, #888);
+        }
+        body[data-theme="pixel"] .p-card::before { display: block; height: 6px; border-radius: 14px 14px 0 0; }
+        .p-name { font-size: 12px; font-weight: 700; color: var(--text-dim); margin: 6px 0 2px; letter-spacing: 0.3px; }
+        body[data-theme="pixel"] .p-name { color: var(--text-dim); margin-top: 2px; font-family: var(--font-score); font-size: 9px; }
+        .p-score { font-family: var(--font-score); font-size: var(--preview-score-size); font-weight: 700; color: var(--text); }
+        body[data-theme="pixel"] .p-score { color: var(--_c, var(--accent)); }
+        .empty-note { color: var(--text-dim); font-size: 13px; }
+
+        .team-input {
+            background: var(--panel);
+            padding: 14px 18px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            border: 1px solid var(--line);
+            margin-bottom: 10px;
+        }
+        body[data-theme="pixel"] .team-input { border: 3px solid var(--line); box-shadow: var(--pixel-shadow); }
+
+        .color-box { display: flex; align-items: center; gap: 8px; }
+        input[type="color"] {
+            width: 30px; height: 30px; border: 2px solid var(--line); border-radius: 50%;
+            cursor: pointer; padding: 0; background: none;
+        }
+        body[data-theme="pixel"] input[type="color"] { border-radius: 0; border: 2px solid #000; }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: inherit; }
+
+        input[type="text"] {
+            padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm);
+            font-size: 15px; outline: none; flex: 1; min-width: 110px;
+            background: var(--panel-alt); color: var(--text); font-family: var(--font-ui);
+        }
+        input[type="text"]:focus { border-color: var(--accent); }
+        body[data-theme="pixel"] input[type="text"] { color: #fff; border: 2px solid var(--line); box-shadow: inset 2px 2px 0 rgba(0,0,0,0.4); }
+
+        .score-control {
+            display: flex; align-items: center; gap: 3px;
+            background: var(--panel-alt); padding: 4px; border-radius: var(--radius-md);
+            border: 1px solid var(--line);
+        }
+        body[data-theme="pixel"] .score-control { border: 2px solid var(--line); box-shadow: inset 2px 2px 0 rgba(0,0,0,0.4); }
+        .score-input {
+            width: 52px; text-align: center; font-weight: 700; font-size: var(--score-size);
+            border: none; background: transparent; outline: none; color: var(--accent);
+            font-family: var(--font-score);
+        }
+        .score-input::-webkit-inner-spin-button, .score-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+        button { font-family: var(--font-ui); font-size: 14px; font-weight: 700; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; }
+        .btn-score {
+            background: #232c3d; color: var(--text); border: 1px solid var(--line);
+            padding: 7px 11px; border-radius: var(--radius-sm);
+        }
+        .btn-score:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+        body[data-theme="pixel"] .btn-score { background: var(--panel-alt); color: var(--text); border: 2px solid var(--line); box-shadow: 2px 2px 0 #000; }
+        body[data-theme="pixel"] .btn-score:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+        body[data-theme="pixel"] .btn-score:active { transform: translate(2px, 2px); box-shadow: none; }
+
+        .btn-add {
+            background: transparent; color: var(--accent); border: 1.5px dashed rgba(56,189,248,0.5);
+            margin-bottom: 16px; padding: 12px 16px; width: 100%; font-size: 14px;
+            border-radius: var(--radius-md);
+        }
+        .btn-add:hover { background: var(--accent-dim); border-style: solid; }
+        body[data-theme="pixel"] .btn-add { border: 3px dashed var(--accent); border-radius: 0; }
+
+        .btn-delete {
+            background: var(--danger-dim); color: var(--danger); padding: 9px 14px; margin-left: auto;
+            border-radius: var(--radius-sm);
+        }
+        .btn-delete:hover { background: rgba(255,77,94,0.22); }
+        .btn-delete:disabled { opacity: 0.35; cursor: not-allowed; }
+        body[data-theme="pixel"] .btn-delete { border: 2px solid var(--danger); box-shadow: 2px 2px 0 #000; }
+        body[data-theme="pixel"] .btn-delete:active { transform: translate(2px, 2px); box-shadow: none; }
+
+        .btn-update {
+            background: var(--accent); color: var(--accent-text); padding: 17px; font-size: 16px;
+            width: 100%; margin-top: 20px; border-radius: var(--radius-lg); letter-spacing: 0.3px;
+        }
+        .btn-update:hover { background: var(--accent-hover); }
+        body[data-theme="pixel"] .btn-update { border: 3px solid #000; box-shadow: var(--pixel-shadow); }
+        body[data-theme="pixel"] .btn-update:active { transform: translate(4px, 4px); box-shadow: none; }
+    </style>
+</head>
+<body>
+    <div class="login-screen" id="loginScreen">
+        <div class="login-card">
+            <h1>스코어 컨트롤러</h1>
+            <p>등록된 경기 비밀번호를 입력하세요. 비밀번호마다 서로 다른 스코어가 열립니다.</p>
+            <form class="login-row" id="loginForm">
+                <input type="password" id="passwordInput" placeholder="비밀번호" autocomplete="current-password" required>
+                <button type="submit" id="loginButton">입장</button>
+            </form>
+            <div class="login-error" id="loginError"></div>
+        </div>
+    </div>
+
+    <div class="container hidden" id="controllerApp">
+        <div class="header-box">
+            <div class="header-left">
+                <div class="eyebrow"><span class="live-dot"></span>LIVE CONTROL</div>
+                <h2 class="title-text">스코어 컨트롤러</h2>
+                <div class="session-name" id="sessionName"></div>
+            </div>
+            <button class="btn-copy" onclick="copyOverlayUrl()">🔗 OBS 오버레이 주소 복사</button>
+        </div>
+
+        <div class="theme-switch">
+            <button class="theme-btn active" data-theme-btn="broadcast" onclick="setTheme('broadcast')">디자인 (베이직)</button>
+            <button class="theme-btn" data-theme-btn="pixel" onclick="setTheme('pixel')">디자인(픽셀)</button>
+        </div>
+
+        <div class="preview-panel">
+            <div class="preview-label">미리보기 · PREVIEW</div>
+            <div class="preview-board" id="previewBoard"></div>
+        </div>
+
+        <button class="btn-add" onclick="addTeam()">+ 새로운 팀 추가</button>
+        <div id="controls"></div>
+        <button class="btn-update" onclick="updateScore()">업데이트</button>
+    </div>
+
+    <script>
+        const container = document.getElementById('controls');
+        const previewBoard = document.getElementById('previewBoard');
+
+        // ★ 앱스 스크립트 웹 앱 URL ★
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwEqwZjVQ6fP-9W7l_YrNogTizhhPgchNDkMHAcq_J8gwKKOtLGCUizQ9X07Z320d5RbQ/exec';
+
+        let teamsData = [
+            { id: 1, name: '1팀', score: 0, color: '#ffffff' },
+            { id: 2, name: '2팀', score: 0, color: '#f03e3e' }
+        ];
+        let nextId = 3;
+        let currentTheme = 'broadcast';
+        let sessionToken = '';
+        let scoreSheet = '';
+
+        const loginScreen = document.getElementById('loginScreen');
+        const controllerApp = document.getElementById('controllerApp');
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+        const loginButton = document.getElementById('loginButton');
+
+        async function api(payload) {
+            const response = await fetch(WEB_APP_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (!response.ok || !data.ok) throw new Error(data.error || '요청에 실패했습니다.');
+            return data;
+        }
+
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            loginError.textContent = '';
+            loginButton.disabled = true;
+            loginButton.textContent = '확인 중...';
+            try {
+                const result = await api({ action: 'login', password: document.getElementById('passwordInput').value });
+                sessionToken = result.token;
+                scoreSheet = result.sheet;
+                teamsData = Array.isArray(result.teams) && result.teams.length ? result.teams : teamsData;
+                nextId = Math.max(0, ...teamsData.map(t => Number(t.id) || 0)) + 1;
+                document.getElementById('sessionName').textContent = result.name || '';
+                loginScreen.classList.add('hidden');
+                controllerApp.classList.remove('hidden');
+                renderControls();
+            } catch (error) {
+                loginError.textContent = error.message === 'Invalid password' ? '비밀번호가 올바르지 않습니다.' : error.message;
+            } finally {
+                loginButton.disabled = false;
+                loginButton.textContent = '입장';
+            }
+        });
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.body.dataset.theme = theme;
+            document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.themeBtn === theme));
+        }
+
+        function copyOverlayUrl() {
+            // 현재 접속 중인 URL 경로를 기준으로 overlay.html 주소 자동 생성 (선택한 테마 반영)
+            const currentUrl = window.location.href.split('?')[0];
+            const basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+            const query = new URLSearchParams({ sheet: scoreSheet, theme: currentTheme });
+            const overlayUrl = basePath + '/overlay.html?' + query.toString();
+
+            navigator.clipboard.writeText(overlayUrl).then(() => {
+                alert("OBS 오버레이용 주소가 복사되었습니다!\nOBS 브라우저 소스 URL에 붙여넣기 하세요.");
+            }).catch(err => {
+                alert("주소 복사 실패: " + err);
+            });
+        }
+
+        function syncData() {
+            const rows = document.querySelectorAll('.team-input');
+            teamsData = Array.from(rows).map(row => ({
+                id: parseInt(row.dataset.id),
+                color: row.querySelector('.team-color').value,
+                name: row.querySelector('.team-name').value,
+                score: parseInt(row.querySelector('.score-input').value) || 0
+            }));
+            renderPreview();
+        }
+
+        function renderPreview() {
+            previewBoard.innerHTML = '';
+            const named = teamsData.filter(t => t.name.trim() !== '');
+            if (named.length === 0) {
+                previewBoard.innerHTML = '<span class="empty-note">팀 이름을 입력하면 여기에 미리보기가 표시됩니다</span>';
+                return;
+            }
+            named.forEach(team => {
+                const card = document.createElement('div');
+                card.className = 'p-card';
+                card.style.setProperty('--_c', team.color);
+                card.innerHTML = `
+                    <div class="p-name">${team.name}</div>
+                    <div class="p-score">${team.score}</div>
+                `;
+                previewBoard.appendChild(card);
+            });
+        }
+
+        function renderControls() {
+            container.innerHTML = '';
+            teamsData.forEach((team) => {
+                const div = document.createElement('div');
+                div.className = 'team-input';
+                div.dataset.id = team.id;
+                div.innerHTML = `
+                    <div class="color-box">
+                        <input type="color" class="team-color" value="${team.color}" oninput="syncData()">
+                    </div>
+                    <input type="text" class="team-name" value="${team.name}" placeholder="팀명" oninput="syncData()">
+                    <div class="score-control">
+                        <button class="btn-score" onclick="adjustScore(${team.id}, -5)">-5</button>
+                        <button class="btn-score" onclick="adjustScore(${team.id}, -1)">-1</button>
+                        <input type="number" class="score-input" id="score_${team.id}" value="${team.score}" oninput="syncData()">
+                        <button class="btn-score" onclick="adjustScore(${team.id}, 1)">+1</button>
+                        <button class="btn-score" onclick="adjustScore(${team.id}, 5)">+5</button>
+                    </div>
+                    <button class="btn-delete" onclick="removeTeam(${team.id})" ${teamsData.length <= 2 ? 'disabled' : ''}>삭제</button>
+                `;
+                container.appendChild(div);
+            });
+            renderPreview();
+        }
+
+        function addTeam() {
+            syncData();
+            const defaultColors = ['#fcc419', '#339af0', '#20c997', '#9775fa', '#ff8787', '#a9e34b'];
+            teamsData.push({ id: nextId, name: nextId + '팀', score: 0, color: defaultColors[(nextId - 3) % defaultColors.length] });
+            nextId++; renderControls();
+        }
+
+        function removeTeam(id) {
+            syncData();
+            if (teamsData.length > 2) { teamsData = teamsData.filter(t => t.id !== id); renderControls(); }
+        }
+
+        function adjustScore(id, amount) {
+            const input = document.getElementById(`score_${id}`);
+            input.value = (parseInt(input.value) || 0) + amount;
+            syncData();
+        }
+
+        function updateScore() {
+            syncData();
+            let exportData = teamsData.filter(t => t.name.trim() !== '');
+            const btn = document.querySelector('.btn-update');
+            const originalText = "업데이트";
+            btn.innerText = "업데이트 중..."; btn.style.backgroundColor = "#5b6272";
+
+            api({ action: 'update', token: sessionToken, teams: exportData })
+            .then(() => {
+                btn.innerText = "업데이트 완료! ✔️"; btn.style.backgroundColor = "#20c997";
+                setTimeout(() => { btn.innerText = originalText; btn.style.backgroundColor = "var(--accent)"; }, 1500);
+            })
+            .catch(error => {
+                alert("전송 오류: " + error);
+                btn.innerText = originalText; btn.style.backgroundColor = "var(--accent)";
+            });
+        }
+
+        document.getElementById('passwordInput').focus();
+    </script>
+</body>
+</html>
